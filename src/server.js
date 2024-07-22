@@ -2,6 +2,12 @@ import express from 'express';
 
 const app = express();
 
-app.listen(3000);
+app.set('view engine', 'pug');
+app.set('views', __dirname + '/views');
 
-console.log('hellow world');
+app.use('/client', express.static(__dirname + '/client'));
+
+app.get('/', (req, res) => res.render('home'));
+
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+app.listen(3000, handleListen);
