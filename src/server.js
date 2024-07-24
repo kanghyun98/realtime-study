@@ -17,16 +17,28 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const server = http.createServer(app); // http server
 const wss = new WebSocket.Server({ server }); // webSocket server
 
+const sockets = [];
+
 wss.on('connection', (socket) => {
   console.log('connected to the client ✅');
 
+  sockets.push(socket);
+
   socket.on('close', () => console.log('disconnected from the client ❌'));
 
-  socket.on('message', (message) =>
-    console.log('client message: ', message.toString())
-  );
+  socket.on('message', (msg) => {
+    const message = JSON.parse(msg);
+    console.log(message);
 
-  socket.send('hello client~~~');
+    switch (message.type) {
+      case 'newMessage':
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}: ${message.payload}`)
+        );
+      case 'nickname':
+        socket['nickname'] = message.payload;
+    }
+  });
 });
 
 server.listen(3000, handleListen);
