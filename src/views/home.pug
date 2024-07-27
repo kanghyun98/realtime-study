@@ -5,6 +5,7 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Document
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+
   body 
     header 
       h1 It works
@@ -13,5 +14,16 @@ html(lang="en")
         form
           input(placeholder="room name", required, type="text")
           button Enter Room    
+
+      div#room
+        h3
+        ul
+        form#nickname
+          input(placeholder="nickname", required, type="text")
+          button Send
+        form#msg
+          input(placeholder="message", required, type="text")
+          button Send
+
     script(src="/socket.io/socket.io.js")
     script(src="/client/app.js")
