@@ -25,13 +25,21 @@ wsServer.on('connection', (socket) => {
   socket.on('enterRoom', (roomName, done) => {
     socket.join(roomName);
     done();
-    socket.to(roomName).emit('welcome', socket.nickname);
+
+    socket
+      .to(roomName)
+      .emit('welcome', socket.nickname, getRoomCount(roomName));
+    wsServer.sockets.emit('roomChange', getPublicRooms());
   });
 
   socket.on('disconnecting', () => {
     socket.rooms.forEach((room) =>
-      socket.to(room).emit('bye', socket.nickname)
+      socket.to(room).emit('bye', socket.nickname, getRoomCount(room) - 1)
     );
+  });
+
+  socket.on('disconnect', () => {
+    wsServer.sockets.emit('roomChange', getPublicRooms());
   });
 
   socket.on('newMessage', (msg, room, done) => {
@@ -41,6 +49,27 @@ wsServer.on('connection', (socket) => {
 
   socket.on('nickname', (nickname) => (socket.nickname = nickname));
 });
+
+function getPublicRooms() {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+
+  return publicRooms;
+}
+
+function getRoomCount(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 httpServer.listen(3000, handleListen);

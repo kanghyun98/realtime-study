@@ -74,14 +74,41 @@ function handleNicknameSubmit(e) {
 
 $form.addEventListener('submit', handleRoomSubmit);
 
+// 방 개수 노출
+function showRoomCount(rooms) {
+  const $roomList = $welcome.querySelector('#room_list ul');
+
+  $roomList.innerHTML = '';
+
+  if (rooms.length === 0) {
+    return;
+  }
+
+  rooms.forEach((room) => {
+    const $li = document.createElement('li');
+    $li.innerText = room;
+    $roomList.append($li);
+  });
+}
+
 // 방 입장
-socket.on('welcome', (user) => {
+socket.on('welcome', (user, roomCount) => {
+  const $h3 = $room.querySelector('h3');
+  $h3.innerText = `Room ${roomName} (${roomCount})`;
+
   addMessage(`${user} entered!`);
 });
 
 // 방 이탈
-socket.on('bye', (left) => {
-  addMessage(`${left} left!`);
+socket.on('bye', (user, roomCount) => {
+  const $h3 = $room.querySelector('h3');
+  $h3.innerText = `Room ${roomName} (${roomCount})`;
+
+  addMessage(`${user} left!`);
 });
 
+// 방 개수
+socket.on('roomChange', showRoomCount);
+
+// 메세지
 socket.on('newMessage', addMessage);
